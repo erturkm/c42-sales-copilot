@@ -1,20 +1,6 @@
 """Static definitions for the C42 Sales Copilot demo seed."""
 TAG = "[C42SEED]"
-ADMIN = "12b9b910-8b58-f011-877a-6045bd8f8274"
-USD = "c1d9412c-2c59-f011-877a-6045bd8f8274"  # org base currency ("USD", symbol $, rate 1.0)
-COMPASS_PL = "972c2497-7048-f111-bec7-000d3abb07c3"
-UOM = "892c2497-7048-f111-bec7-000d3abb07c3"
-# product GUIDs (existing catalog)
-P = {
- "gpt5_in": "80f92a9d-7048-f111-bec7-000d3abb07c3", "gpt5_out": "8df92a9d-7048-f111-bec7-000d3abb07c3",
- "ar41_in": "08fa2a9d-7048-f111-bec7-000d3abb07c3", "ar41_out": "14fa2a9d-7048-f111-bec7-000d3abb07c3",
- "oss120_in": "1b2c1eaf-7048-f111-bec7-000d3abb07c3", "oss120_out": "2b2c1eaf-7048-f111-bec7-000d3abb07c3",
- "oss20_in": "3e2c1eaf-7048-f111-bec7-000d3abb07c3", "gpt54_in": "a22c2497-7048-f111-bec7-000d3abb07c3",
- "h100": "e305a85c-125f-f111-ab0c-7c1e52847c61", "azlocal": "902e70a9-c3d1-f111-a05b-7c1e52847c61",
- "landing": "9a2e70a9-c3d1-f111-a05b-7c1e52847c61", "ptu": "421603a3-c3d1-f111-a05b-7c1e52847c61",
- "purview": "4c8d0e08-c4d1-f111-a05b-7c1e52847c61", "impl": "9a20127d-125f-f111-ab0c-7c1e52847c61",
- "mgdops": "bb771d83-125f-f111-ab0c-7c1e52847c61",
-}
+P = {}  # product keys are defined in webresource/products.json
 FAM = {"Compass": 100000000, "AI Cloud GPU": 100000001, "Sovereign Cloud": 100000002, "Insight": 100000003, "Professional Services": 100000004}
 ST = {"Active": 100000000, "Pilot": 100000001, "Renewal Due": 100000002, "Churn Risk": 100000003, "Expired": 100000004}
 BUNDLES = {"h100": "Core42 GPU Compute Stack (H100 SXM5)", "h100ai": "Core42 AI Compute Stack (H100 SXM5)", "b100": "Core42 GPU Compute Stack - B100",
