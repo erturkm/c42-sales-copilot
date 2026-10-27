@@ -1,0 +1,83 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "C42 Foundry Realtime",
+    "description": "Mints short-lived Azure AI Foundry gpt-realtime client secrets on behalf of the signed-in user.",
+    "version": "1.0"
+  },
+  "host": "example.openai.azure.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/openai/v1/realtime/client_secrets": {
+      "post": {
+        "summary": "Create realtime client secret",
+        "operationId": "CreateRealtimeClientSecret",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "x-foundry-host",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Foundry host",
+            "description": "Azure AI Foundry / Azure OpenAI hostname, e.g. myres.openai.azure.com"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "session": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "expires_at": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": []
+    }
+  ]
+}

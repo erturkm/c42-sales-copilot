@@ -1,0 +1,82 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "C42 Foundry Calls",
+    "description": "WebRTC SDP exchange for Azure AI Foundry gpt-realtime using a short-lived client secret.",
+    "version": "1.0"
+  },
+  "host": "example.openai.azure.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/openai/v1/realtime/calls": {
+      "post": {
+        "summary": "Exchange SDP offer for answer",
+        "operationId": "CreateRealtimeCall",
+        "x-ms-visibility": "important",
+        "consumes": [
+          "application/sdp"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "x-foundry-host",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Foundry host",
+            "description": "Azure AI Foundry / Azure OpenAI hostname, e.g. myres.openai.azure.com"
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ek",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sdp": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sdp": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+node_modules
+dist
+.power
+*.log
+.DS_Store
+power.config.json
+.secrets.env
+connector/apiProperties.json
