@@ -1,0 +1,107 @@
+{
+ "gpt5_in": {
+  "name": "Core42 Compass - GPT-5 - Input / 1M text tokens",
+  "number": "C42-text-tokens-gpt-5-input-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-5 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 1.25
+ },
+ "gpt5_out": {
+  "name": "Core42 Compass - GPT-5 - Output / 1M text tokens",
+  "number": "C42-text-tokens-gpt-5-output-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-5 | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 10.0
+ },
+ "ar41_in": {
+  "name": "Core42 Compass - GPT-4.1 Arabic - Input / 1M text tokens",
+  "number": "C42-text-tokens-gpt-41-arabic-input-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-4.1-arabic | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 2.2
+ },
+ "ar41_out": {
+  "name": "Core42 Compass - GPT-4.1 Arabic - Output / 1M text tokens",
+  "number": "C42-text-tokens-gpt-41-arabic-output-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-4.1-arabic | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 8.8
+ },
+ "oss120_in": {
+  "name": "Core42 Compass - gpt-oss-120b Core42 - Input / 1M text tokens",
+  "number": "C42-text-tokens-gpt-oss-120b-core42-input-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-oss-120b-core42 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 0.3
+ },
+ "oss120_out": {
+  "name": "Core42 Compass - gpt-oss-120b Core42 - Output / 1M text tokens",
+  "number": "C42-text-tokens-gpt-oss-120b-core42-output-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-oss-120b-core42 | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 0.75
+ },
+ "oss20_in": {
+  "name": "Core42 Compass - gpt-oss-20b - Input / 1M text tokens",
+  "number": "C42-text-tokens-gpt-oss-20b-core42-input-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-oss-20b-core42 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 0.2
+ },
+ "gpt54_in": {
+  "name": "Core42 Compass - GPT-5.4 - Input / 1M text tokens",
+  "number": "C42-text-tokens-gpt-54-input-1m-text-tokens",
+  "desc": "Text Tokens | Model ID: gpt-5.4 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.",
+  "qd": 5,
+  "amount": 2.5
+ },
+ "h100": {
+  "name": "NVIDIA H100 SXM5 (80GB)",
+  "number": "GPU-H100-SXM5",
+  "desc": "NVIDIA Hopper H100 80GB SXM5. Export-controlled, requires US compliance review.",
+  "qd": 0,
+  "amount": 119350
+ },
+ "azlocal": {
+  "name": "Azure Local (Sovereign Private Cloud) - Node / month",
+  "number": "C42-AZ-LOCAL",
+  "desc": "Azure service offered by Core42 to its customers (demo catalog)",
+  "qd": 0,
+  "amount": 3200.0
+ },
+ "landing": {
+  "name": "Sovereign Landing Zone (Core42 Sovereign Public Cloud) - Managed service / month",
+  "number": "C42-AZ-SLZ",
+  "desc": "Azure service offered by Core42 to its customers (demo catalog)",
+  "qd": 0,
+  "amount": 18000.0
+ },
+ "ptu": {
+  "name": "Azure OpenAI Provisioned Throughput (Sovereign UAE North) - 100 PTU / month",
+  "number": "C42-AZ-AOAI-PTU",
+  "desc": "Azure service offered by Core42 to its customers (demo catalog)",
+  "qd": 0,
+  "amount": 26000.0
+ },
+ "purview": {
+  "name": "Microsoft Purview + Defender for Cloud (Sovereign Controls) - Bundle / month",
+  "number": "C42-AZ-PURVIEW",
+  "desc": "Azure service offered by Core42 to its customers (demo catalog)",
+  "qd": 0,
+  "amount": 5200.0
+ },
+ "impl": {
+  "name": "Core42 Implementation Services",
+  "number": "SVC-IMPL",
+  "desc": "Cluster bring-up, networking, security baseline, knowledge transfer.",
+  "qd": 0,
+  "amount": 6800
+ },
+ "mgdops": {
+  "name": "Core42 Managed AI Operations",
+  "number": "SVC-MANAGED",
+  "desc": "24x7 managed AI infrastructure operations.",
+  "qd": 0,
+  "amount": 312000
+ }
+}

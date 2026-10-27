@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>C42 Sales Copilot - Demo data</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0b1020;--card:#141b34;--line:#26305a;--fg:#e8ecff;--mut:#9aa6d6;--acc:#5b8cff;--ok:#3ddc97;--bad:#ff6b6b;--warn:#ffc857}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.warn{border-color:#6b5520;background:#241f10;color:#ffe3a1}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
+button.sec{background:transparent;border:1px solid var(--line);color:var(--fg)}button.dng{background:#a83a3a}button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.chk{display:flex;gap:8px;align-items:center;padding:3px 0}
+.bar{height:8px;border-radius:6px;background:#0d1330;overflow:hidden;margin:10px 0}.bar>i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+#log{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;background:#070b18;border:1px solid var(--line);border-radius:8px;padding:10px;height:280px;overflow:auto;white-space:pre-wrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.w{color:var(--warn)}.pill{display:inline-block;padding:1px 8px;border-radius:99px;border:1px solid var(--line);font-size:12px;color:var(--mut);margin-right:6px}
+</style></head><body><div class="wrap">
+<h1>C42 Sales Copilot - demo data</h1>
+<div class="sub">Seeds fictional Core42 customer accounts into <b id="org">this environment</b>: accounts, contacts, subscriptions, monthly consumption, pipeline, cases and activities.</div>
+<div class="card warn"><b>Demo-grade.</b> Creates sample records in the environment you opened this page from, using <i>your</i> sign-in. All names are fictional. Run it only in a demo/dev environment. Safe to run again (it skips what already exists). "Remove demo data" deletes only the records this page created (tagged <code>[C42SEED]</code>).</div>
+<div class="card"><b>Pre-checks</b><div id="checks" style="margin-top:6px">Checking...</div></div>
+<div class="card"><b>Accounts to seed</b><div id="accts" style="margin-top:6px"></div>
+<div class="row" style="margin-top:12px"><button id="go" disabled>Seed demo data</button><button id="rm" class="sec dng" disabled>Remove demo data</button><span id="state" class="sub" style="margin:0"></span></div>
+<div class="bar"><i id="pb"></i></div></div>
+<div class="card"><div id="log"></div></div>
+</div>
+<script>
+const DATA={"TAG":"[C42SEED]","ACCOUNTS":[{"key":"ehsn","name":"Emirates Health Sovereign Network","flagship":true,"ind":11,"rev":2400000000,"emp":18500,"city":"Abu Dhabi","country":"United Arab Emirates","web":"https://www.ehsn.example.com","dom":"ehsn.example.com","desc":"UAE government health authority operating a federated network of public hospitals and clinics. Sovereign AI for clinical decision support, Arabic/English patient engagement and population-health analytics. Flagship Core42 customer.","vip":true,"tier":723720003,"ai":723720002,"arr":7980000,"phone":"+971 2 410 5000","contacts":[["Dr. Maryam","Al Hammadi","Chief Executive Officer"],["Khalid","Al Suwaidi","Chief Technology Officer (Executive Sponsor)"],["Dr. Noura","Al Kaabi","Chief Digital & Data Officer"],["Rashed","Al Mansoori","Chief Information Security Officer"],["Hessa","Al Tenaiji","Head of Procurement"],["Dr. Omar","Siddiqui","Director, Clinical AI Programme"]]},{"key":"annb","name":"Al Noor National Bank","ind":16,"rev":5200000000,"emp":7200,"city":"Dubai","country":"United Arab Emirates","web":"https://www.alnoorbank.example.com","dom":"alnoorbank.example.com","desc":"Top-5 UAE national bank. Running Arabic-capable GenAI assistants for retail banking and fraud analytics on sovereign infrastructure.","vip":true,"tier":723720002,"ai":723720002,"arr":3150000,"phone":"+971 4 300 2200","contacts":[["Faisal","Al Mazrouei","Chief Technology Officer (Executive Sponsor)"],["Layla","Haddad","Chief Data Officer"],["Sanjay","Mehta","Chief Information Security Officer"],["Aisha","Al Falasi","Head of Procurement"],["Tariq","Nasser","VP, Digital Banking"]]},{"key":"mgeg","name":"Meridian Gulf Energy Group","ind":24,"rev":18700000000,"emp":24000,"city":"Abu Dhabi","country":"United Arab Emirates","web":"https://www.meridiangulf.example.com","dom":"meridiangulf.example.com","desc":"Integrated energy major with upstream, downstream and renewables. GPU compute for seismic and reservoir simulation plus AI maintenance copilots.","vip":true,"tier":723720002,"ai":723720001,"arr":4620000,"phone":"+971 2 666 1000","contacts":[["Saeed","Al Dhaheri","Chief Digital Officer (Executive Sponsor)"],["Priya","Venkataraman","Head of Subsurface Computing"],["Mohammed","Al Ketbi","Chief Information Security Officer"],["Elena","Petrova","Procurement Director"],["Jamal","Al Marri","VP, Technology Infrastructure"]]},{"key":"smg","name":"Savanna Mobile Group","ind":6,"rev":1900000000,"emp":9800,"city":"Nairobi","country":"Kenya","web":"https://www.savannamobile.example.com","dom":"savannamobile.example.com","desc":"Pan-African mobile operator across 9 markets. Piloting Compass-hosted LLMs for multilingual customer care and network analytics.","vip":false,"tier":723720001,"ai":723720001,"arr":1240000,"phone":"+254 20 555 0100","contacts":[["Wanjiru","Kamau","Chief Technology Officer (Executive Sponsor)"],["David","Otieno","Chief Data Officer"],["Amina","Hassan","Head of Cybersecurity"],["Peter","Mwangi","Head of Procurement"]]},{"key":"fdsa","name":"Federal Digital Services Authority","ind":27,"rev":950000000,"emp":2100,"city":"Abu Dhabi","country":"United Arab Emirates","web":"https://www.fdsa.example.com","dom":"fdsa.example.com","desc":"Government digital agency delivering citizen services. Sovereign public cloud landing zone and Arabic GenAI citizen assistant on Compass.","vip":true,"tier":723720003,"ai":723720002,"arr":3870000,"phone":"+971 2 811 4000","contacts":[["Sultan","Al Neyadi","Director General (Executive Sponsor)"],["Mariam","Al Shamsi","Chief Technology Officer"],["Yousef","Al Blooshi","Chief Information Security Officer"],["Fatima","Al Zaabi","Head of Procurement"],["Hamdan","Al Ali","Director, AI & Emerging Tech"]]},{"key":"gfrui","name":"Gulf Frontier Research University","ind":27,"rev":420000000,"emp":3400,"city":"Sharjah","country":"United Arab Emirates","web":"https://www.gfru.example.com","dom":"gfru.example.com","desc":"Research university with an AI institute focused on Arabic LLMs, climate and genomics. GPU cluster consumer under a research agreement.","vip":false,"tier":723720001,"ai":723720001,"arr":1020000,"phone":"+971 6 515 3000","contacts":[["Prof. Ibrahim","Al Qasimi","Vice Chancellor (Executive Sponsor)"],["Dr. Sara","Lindqvist","Director, AI Research Institute"],["Anwar","Khoury","Chief Information Officer"],["Reem","Al Nuaimi","Head of Procurement"]]},{"key":"ndsc","name":"New Delta Smart City Developers","ind":29,"rev":1300000000,"emp":2600,"city":"Cairo","country":"Egypt","web":"https://www.newdeltacity.example.com","dom":"newdeltacity.example.com","desc":"Master developer of a 40km2 smart-city in the Nile Delta. Digital-twin, IoT analytics and resident-services AI.","vip":false,"tier":723720000,"ai":723720000,"arr":380000,"phone":"+20 2 3300 7000","contacts":[["Omar","El-Sayed","Chief Executive Officer"],["Nadia","Fawzy","Chief Technology Officer (Executive Sponsor)"],["Karim","Abdelrahman","Head of Smart Infrastructure"],["Mona","Ezzat","Procurement Manager"]]},{"key":"mslg","name":"Maritime Silk Ports & Logistics Group","ind":30,"rev":3400000000,"emp":12500,"city":"Singapore","country":"Singapore","web":"https://www.maritimesilk.example.com","dom":"maritimesilk.example.com","desc":"Ports and logistics group operating terminals across the Gulf, East Africa and South-East Asia. AI-driven yard optimisation and customs document automation.","vip":false,"tier":723720002,"ai":723720001,"arr":1760000,"phone":"+65 6100 8800","contacts":[["Wei Lin","Tan","Chief Digital Officer (Executive Sponsor)"],["Rajesh","Nair","Chief Technology Officer"],["Hannah","Lim","Chief Information Security Officer"],["Ahmed","Al Rumaithi","Head of Procurement"],["Sofia","Marchetti","VP, Terminal Automation"]]}],"SUBS":{"ehsn":[{"name":"EHSN - Compass GPT-5","fam":"Compass","svc":"Compass - GPT-5 (Input/Output blend)","prod":"gpt5_in","st":"Active","start":"2025-11-01","end":"2027-10-31","commit":900000,"units":257000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.42,"g":0.075,"note":"Clinical documentation & triage copilot."},{"name":"EHSN - Compass gpt-oss-120b Core42","fam":"Compass","svc":"Compass - gpt-oss-120b Core42","prod":"oss120_in","st":"Active","start":"2025-11-01","end":"2027-10-31","commit":420000,"units":700000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.5,"g":0.06,"note":"High-volume internal summarisation on Core42-hosted open-weight model."},{"name":"EHSN - Compass GPT-4.1 Arabic","fam":"Compass","svc":"Compass - GPT-4.1 Arabic","prod":"ar41_in","st":"Churn Risk","start":"2025-11-01","end":"2027-03-31","commit":360000,"units":100000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.8,"g":-0.09,"note":"Usage declining since Q2 - patient-portal team migrating to gpt-oss-120b; sponsor escalation needed."},{"name":"EHSN - AI Cloud H100 Stack","fam":"AI Cloud GPU","svc":"Core42 GPU Compute Stack (H100 SXM5) - 64 GPU reserved","prod":"h100","st":"Active","start":"2025-11-01","end":"2027-10-31","commit":1500000,"units":560640,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.58,"g":0.04,"note":"Reserved 8-node H100 SXM5 cluster for medical-imaging model training."},{"name":"EHSN - Sovereign Cloud (Azure Local)","fam":"Sovereign Cloud","svc":"Sovereign Private Cloud - Azure Local nodes","prod":"azlocal","st":"Renewal Due","start":"2024-01-11","end":"2027-01-10","commit":1100000,"units":96,"unit":"node-months","region":"UAE Central Sovereign","u0":0.9,"g":0.012,"note":"Renewal in ~75 days; expansion to 12 nodes under discussion."},{"name":"EHSN - Insight Analytics Platform","fam":"Insight","svc":"Core42 Insight - Population Health Analytics","prod":"","st":"Active","start":"2025-11-01","end":"2027-10-31","commit":480000,"units":1200,"unit":"capacity-unit-months","region":"UAE North Sovereign","u0":0.62,"g":0.035,"note":"Population-health dashboards & data lakehouse."},{"name":"EHSN - AI Solutioning (Talent)","fam":"Professional Services","svc":"Core42 AI Solutioning - man-days","prod":"impl","st":"Active","start":"2025-11-01","end":"2026-12-31","commit":840000,"units":600,"unit":"man-days","region":"UAE North Sovereign","u0":0.7,"g":0.0,"note":"Embedded AI engineers for clinical AI programme."}],"annb":[{"name":"ANNB - Compass GPT-5 mini","fam":"Compass","svc":"Compass - GPT-5 mini","prod":"gpt5_in","st":"Active","start":"2026-01-01","end":"2026-12-31","commit":420000,"units":300000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.55,"g":0.07,"note":""},{"name":"ANNB - AI Cloud H100","fam":"AI Cloud GPU","svc":"Core42 AI Compute Stack (H100 SXM5)","prod":"h100","st":"Active","start":"2026-01-01","end":"2027-12-31","commit":1800000,"units":420480,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.65,"g":0.03,"note":""},{"name":"ANNB - Sovereign Landing Zone","fam":"Sovereign Cloud","svc":"Sovereign Landing Zone (Core42 Sovereign Public Cloud)","prod":"landing","st":"Renewal Due","start":"2023-12-01","end":"2026-12-15","commit":930000,"units":12,"unit":"managed-service-months","region":"UAE North Sovereign","u0":0.88,"g":0.01,"note":"Renewal due in under 60 days."}],"mgeg":[{"name":"MGEG - AI Cloud B200 Stack","fam":"AI Cloud GPU","svc":"Core42 GPU Compute Stack (B200)","prod":"h100","st":"Active","start":"2026-03-01","end":"2028-02-29","commit":2900000,"units":350400,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.52,"g":0.06,"note":""},{"name":"MGEG - Compass gpt-oss-120b","fam":"Compass","svc":"Compass - gpt-oss-120b Core42","prod":"oss120_in","st":"Active","start":"2026-03-01","end":"2027-02-28","commit":360000,"units":600000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.45,"g":0.08,"note":""},{"name":"MGEG - Insight Seismic Analytics","fam":"Insight","svc":"Core42 Insight - Subsurface Data Platform","prod":"","st":"Pilot","start":"2026-05-01","end":"2026-12-31","commit":420000,"units":720,"unit":"capacity-unit-months","region":"UAE Central Sovereign","u0":0.4,"g":0.09,"note":""},{"name":"MGEG - AI Solutioning","fam":"Professional Services","svc":"Core42 AI Solutioning - man-days","prod":"impl","st":"Active","start":"2026-03-01","end":"2027-02-28","commit":360000,"units":260,"unit":"man-days","region":"UAE North Sovereign","u0":0.75,"g":0.0,"note":""}],"smg":[{"name":"SMG - Compass GPT-5 mini Pilot","fam":"Compass","svc":"Compass - GPT-5 mini","prod":"gpt5_in","st":"Pilot","start":"2026-05-01","end":"2026-12-31","commit":240000,"units":70000,"unit":"1M tokens","region":"Nairobi Edge / UAE North","u0":0.3,"g":0.12,"note":"Pilot for multilingual care bot; 429 throttling raised."},{"name":"SMG - Compass gpt-oss-20b","fam":"Compass","svc":"Compass - gpt-oss-20b","prod":"oss20_in","st":"Active","start":"2026-02-01","end":"2027-01-31","commit":180000,"units":500000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.6,"g":0.04,"note":""},{"name":"SMG - Insight Network Analytics","fam":"Insight","svc":"Core42 Insight - Telecom Network Analytics","prod":"","st":"Churn Risk","start":"2025-12-01","end":"2026-11-30","commit":820000,"units":600,"unit":"capacity-unit-months","region":"UAE North Sovereign","u0":0.55,"g":-0.07,"note":"Low adoption; CTO exploring alternative vendor."}],"fdsa":[{"name":"FDSA - Sovereign Public Cloud Landing Zone","fam":"Sovereign Cloud","svc":"Sovereign Landing Zone (Core42 Sovereign Public Cloud)","prod":"landing","st":"Active","start":"2025-07-01","end":"2027-06-30","commit":1700000,"units":12,"unit":"managed-service-months","region":"UAE Central Sovereign","u0":0.85,"g":0.015,"note":""},{"name":"FDSA - Compass GPT-4.1 Arabic","fam":"Compass","svc":"Compass - GPT-4.1 Arabic","prod":"ar41_in","st":"Active","start":"2026-01-01","end":"2026-12-31","commit":640000,"units":180000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.6,"g":0.08,"note":"Citizen assistant."},{"name":"FDSA - AI Cloud H100 Stack","fam":"AI Cloud GPU","svc":"Core42 AI Compute Stack (H100 SXM5)","prod":"h100","st":"Active","start":"2026-01-01","end":"2027-12-31","commit":1100000,"units":280320,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.62,"g":0.03,"note":""},{"name":"FDSA - Insight Open Data","fam":"Insight","svc":"Core42 Insight - Government Data Exchange","prod":"","st":"Renewal Due","start":"2023-12-20","end":"2026-12-19","commit":430000,"units":480,"unit":"capacity-unit-months","region":"UAE North Sovereign","u0":0.82,"g":0.01,"note":"Renewal due in ~53 days."}],"gfrui":[{"name":"GFRU - Research GPU Cluster (B100)","fam":"AI Cloud GPU","svc":"Core42 GPU Compute Stack - B100","prod":"h100","st":"Active","start":"2026-01-01","end":"2026-12-31","commit":780000,"units":280320,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.48,"g":0.06,"note":"Research agreement - bursty usage around paper deadlines."},{"name":"GFRU - Compass gpt-oss-120b","fam":"Compass","svc":"Compass - gpt-oss-120b Core42","prod":"oss120_in","st":"Active","start":"2026-01-01","end":"2026-12-31","commit":120000,"units":200000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.55,"g":0.05,"note":""}],"ndsc":[{"name":"NDSC - Compass gpt-oss-20b Pilot","fam":"Compass","svc":"Compass - gpt-oss-20b","prod":"oss20_in","st":"Pilot","start":"2026-05-01","end":"2026-12-31","commit":90000,"units":250000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.35,"g":0.15,"note":""},{"name":"NDSC - SLM Development POC","fam":"AI Cloud GPU","svc":"SLM Development POC Bundle","prod":"h100","st":"Pilot","start":"2026-05-01","end":"2026-11-30","commit":110000,"units":40000,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.6,"g":0.02,"note":"POC for city-operations small language model."}],"mslg":[{"name":"MSLG - Compass GPT-5","fam":"Compass","svc":"Compass - GPT-5","prod":"gpt5_in","st":"Active","start":"2026-02-01","end":"2027-01-31","commit":380000,"units":110000,"unit":"1M tokens","region":"UAE North Sovereign","u0":0.52,"g":0.06,"note":""},{"name":"MSLG - AI Cloud H100 Stack","fam":"AI Cloud GPU","svc":"Core42 GPU Compute Stack (H100 SXM5)","prod":"h100","st":"Active","start":"2026-02-01","end":"2027-12-31","commit":980000,"units":245280,"unit":"GPU-hours","region":"UAE North Sovereign","u0":0.57,"g":0.04,"note":""},{"name":"MSLG - AI Solutioning","fam":"Professional Services","svc":"Core42 AI Solutioning - man-days","prod":"impl","st":"Active","start":"2026-02-01","end":"2026-12-31","commit":398000,"units":285,"unit":"man-days","region":"Singapore / UAE","u0":0.8,"g":0.0,"note":""}]},"OPEN":{"ehsn":[["EHSN - Compass GPT-5 Expansion (all hospitals)",1450000,3,2,70,1,null,[["gpt5_in",250000,2.5],["gpt5_out",70000,10.0]],"Extend Compass GPT-5 to all 41 hospitals. Commit uplift."],["EHSN - H100 Stack Expansion + B200 Pilot",3200000,6,1,45,0,"h100",[["h100",1000000,3.2]],"Add 64 H100 GPUs plus B200 pilot; Bundle: Core42 GPU Compute Stack (H100 SXM5) and Core42 GPU Compute Stack (B200)."],["EHSN - Sovereign Cloud Renewal & Azure Local Expansion",1300000,2,2,85,1,null,[["azlocal",108,12000]],"Renew Azure Local nodes, expand 8 -> 12 nodes."]],"annb":[["Al Noor - GenAI Fraud Copilot on Compass",780000,4,2,60,1,null,[["gpt5_in",150000,2.5],["gpt5_out",40000,10.0]],"Fraud investigator copilot."],["Al Noor - B200 Training Stack",2400000,8,0,25,0,"b200",[["h100",600000,4.0]],"Bundle: Core42 GPU Compute Stack (B200) for in-house Arabic financial LLM."]],"mgeg":[["Meridian - Seismic GPU Burst Capacity",1900000,5,1,50,0,"h100",[["h100",700000,2.7]],"Bundle: Core42 AI Compute Stack (H100 SXM5)."],["Meridian - Maintenance Copilot on Compass",520000,3,2,65,1,null,[["oss120_in",400000,0.6],["oss120_out",120000,2.4]],"Field maintenance assistant."]],"smg":[["Savanna - Compass Production Rollout",640000,2,2,55,0,null,[["gpt5_in",120000,2.5],["oss20_in",400000,0.4]],"Move care bot from pilot to production; resolve rate limits."],["Savanna - Insight Retention Offer",410000,1,1,40,0,null,[],"Retention package for Insight Network Analytics."]],"fdsa":[["FDSA - Citizen Assistant Phase 2 (Compass)",950000,3,2,75,1,null,[["ar41_in",200000,2.5],["ar41_out",60000,10.0]],"National citizen assistant roll-out."],["FDSA - B100 Sovereign Training Stack",2100000,9,0,20,0,"b100",[["h100",500000,4.2]],"Bundle: Core42 GPU Compute Stack - B100."]],"gfrui":[["GFRU - Arabic LLM Research Cluster Extension",650000,4,1,50,0,"b100",[["h100",250000,2.6]],"Bundle: Core42 GPU Compute Stack - B100."]],"ndsc":[["New Delta - City Operations SLM",340000,6,1,35,0,"slm",[["oss20_in",300000,0.4]],"Bundle: SLM Development POC Bundle -> production."],["New Delta - Resident Services Assistant",180000,3,0,30,0,null,[["gpt5_in",40000,2.5]],"Arabic/English resident assistant."]],"mslg":[["Maritime Silk - Customs Document AI",720000,3,2,65,1,null,[["gpt5_in",150000,2.5],["gpt5_out",40000,10.0]],"Customs doc extraction on Compass."],["Maritime Silk - Yard Optimisation GPU Stack",1650000,7,1,40,0,"h100",[["h100",520000,3.0]],"Bundle: Core42 GPU Compute Stack (H100 SXM5)."]]},"WON":{"ehsn":[["EHSN - Initial Compass & H100 Platform Deal",2900000,330],["EHSN - Insight Analytics Platform",480000,200]],"annb":[["Al Noor - Compass GPT-5 mini Launch",420000,290]],"mgeg":[["Meridian - B200 Stack Multi-year Deal",2900000,240],["Meridian - AI Solutioning Package",360000,235]],"smg":[["Savanna - Compass Pilot Agreement",240000,170]],"fdsa":[["FDSA - Sovereign Landing Zone",1700000,480],["FDSA - Compass Arabic Assistant Phase 1",640000,300]],"gfrui":[["GFRU - Research Cluster Agreement",780000,300]],"ndsc":[["New Delta - Compass Pilot",90000,110]],"mslg":[["Maritime Silk - H100 Stack Agreement",980000,260]]},"CASE_POOL":{"gpu":["GPU node provisioning delayed on {w}","Requested {w} GPU nodes not provisioned within SLA. Customer awaiting capacity confirmation in UAE North Sovereign region.",1,2],"429":["Compass {m} returning HTTP 429 token throttling","Production workload hitting tokens-per-minute limits on Compass model {m}. Customer requests quota increase.",1,2],"res":["Data residency confirmation for {s}","Customer compliance team asks for written confirmation that {s} data and logs remain within UAE sovereign boundary.",2,3],"bill":["Invoice discrepancy - Compass usage billing","Billed token usage differs from customer dashboard by ~4%. Please reconcile.",3,1],"sso":["SSO / Entra ID integration for Compass portal","Customer wants SAML SSO and role mapping for the Compass console.",2,3],"lat":["Inference latency spike on {m}","P95 latency doubled between 14:00 and 16:00 GST on {m}.",2,2],"nccl":["InfiniBand / NCCL performance below baseline on H100 cluster","Multi-node training throughput 18% below benchmark.",1,2],"onb":["Onboarding: additional users for Insight workspace","Request to add 25 analysts and configure row-level security.",3,3]},"CASES":{"ehsn":[["gpu",{"w":"16 additional H100"},false,4],["429",{"m":"GPT-5"},true,21],["res",{"s":"patient imaging datasets"},true,40],["lat",{"m":"gpt-oss-120b Core42"},false,2]],"annb":[["429",{"m":"GPT-5 mini"},false,3],["res",{"s":"transaction logs"},true,30],["bill",{},true,18]],"mgeg":[["nccl",{},false,6],["gpu",{"w":"32 H100"},true,25],["sso",{},true,50]],"smg":[["429",{"m":"GPT-5 mini"},false,5],["res",{"s":"subscriber data (Kenya DPA)"},false,8],["onb",{},true,33]],"fdsa":[["res",{"s":"citizen-service conversation logs"},true,28],["lat",{"m":"GPT-4.1 Arabic"},false,1],["gpu",{"w":"8 H100"},true,45],["sso",{},false,7]],"gfrui":[["nccl",{},false,9],["gpu",{"w":"B100"},true,35]],"ndsc":[["onb",{},false,6],["res",{"s":"IoT telemetry"},true,20]],"mslg":[["gpu",{"w":"24 H100"},false,3],["bill",{},true,27],["res",{"s":"customs documents"},true,44]]},"FAM":{"Compass":100000000,"AI Cloud GPU":100000001,"Sovereign Cloud":100000002,"Insight":100000003,"Professional Services":100000004},"ST":{"Active":100000000,"Pilot":100000001,"Renewal Due":100000002,"Churn Risk":100000003,"Expired":100000004},"PRODUCTS":{"gpt5_in":{"name":"Core42 Compass - GPT-5 - Input / 1M text tokens","number":"C42-text-tokens-gpt-5-input-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-5 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":1.25},"gpt5_out":{"name":"Core42 Compass - GPT-5 - Output / 1M text tokens","number":"C42-text-tokens-gpt-5-output-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-5 | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":10.0},"ar41_in":{"name":"Core42 Compass - GPT-4.1 Arabic - Input / 1M text tokens","number":"C42-text-tokens-gpt-41-arabic-input-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-4.1-arabic | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":2.2},"ar41_out":{"name":"Core42 Compass - GPT-4.1 Arabic - Output / 1M text tokens","number":"C42-text-tokens-gpt-41-arabic-output-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-4.1-arabic | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":8.8},"oss120_in":{"name":"Core42 Compass - gpt-oss-120b Core42 - Input / 1M text tokens","number":"C42-text-tokens-gpt-oss-120b-core42-input-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-oss-120b-core42 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":0.3},"oss120_out":{"name":"Core42 Compass - gpt-oss-120b Core42 - Output / 1M text tokens","number":"C42-text-tokens-gpt-oss-120b-core42-output-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-oss-120b-core42 | Meter: Output / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":0.75},"oss20_in":{"name":"Core42 Compass - gpt-oss-20b - Input / 1M text tokens","number":"C42-text-tokens-gpt-oss-20b-core42-input-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-oss-20b-core42 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":0.2},"gpt54_in":{"name":"Core42 Compass - GPT-5.4 - Input / 1M text tokens","number":"C42-text-tokens-gpt-54-input-1m-text-tokens","desc":"Text Tokens | Model ID: gpt-5.4 | Meter: Input / 1M text tokens | Source: Core42 Compass Model Pricing page.","qd":5,"amount":2.5},"h100":{"name":"NVIDIA H100 SXM5 (80GB)","number":"GPU-H100-SXM5","desc":"NVIDIA Hopper H100 80GB SXM5. Export-controlled, requires US compliance review.","qd":0,"amount":119350},"azlocal":{"name":"Azure Local (Sovereign Private Cloud) - Node / month","number":"C42-AZ-LOCAL","desc":"Azure service offered by Core42 to its customers (demo catalog)","qd":0,"amount":3200.0},"landing":{"name":"Sovereign Landing Zone (Core42 Sovereign Public Cloud) - Managed service / month","number":"C42-AZ-SLZ","desc":"Azure service offered by Core42 to its customers (demo catalog)","qd":0,"amount":18000.0},"ptu":{"name":"Azure OpenAI Provisioned Throughput (Sovereign UAE North) - 100 PTU / month","number":"C42-AZ-AOAI-PTU","desc":"Azure service offered by Core42 to its customers (demo catalog)","qd":0,"amount":26000.0},"purview":{"name":"Microsoft Purview + Defender for Cloud (Sovereign Controls) - Bundle / month","number":"C42-AZ-PURVIEW","desc":"Azure service offered by Core42 to its customers (demo catalog)","qd":0,"amount":5200.0},"impl":{"name":"Core42 Implementation Services","number":"SVC-IMPL","desc":"Cluster bring-up, networking, security baseline, knowledge transfer.","qd":0,"amount":6800},"mgdops":{"name":"Core42 Managed AI Operations","number":"SVC-MANAGED","desc":"24x7 managed AI infrastructure operations.","qd":0,"amount":312000}}};
+const ORG=location.origin, API=ORG+"/api/data/v9.2/";
+const TAG=DATA.TAG, $=id=>document.getElementById(id);
+const log=(m,c)=>{const e=$("log"),s=document.createElement("span");if(c)s.className=c;s.textContent=m+"\n";e.appendChild(s);e.scrollTop=e.scrollHeight};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function api(method,path,body,headers){
+  const url=path.startsWith("http")?path:API+path;
+  for(let a=0;a<6;a++){
+    const r=await fetch(url,{method,credentials:"same-origin",headers:Object.assign({"Accept":"application/json","OData-MaxVersion":"4.0","OData-Version":"4.0","Content-Type":"application/json; charset=utf-8"},headers||{}),body:body===undefined?undefined:JSON.stringify(body)});
+    if(r.ok){const t=await r.text();return{json:t?JSON.parse(t):null,h:r.headers}}
+    const t=await r.text();
+    if([429,503,504].includes(r.status)||/1205|another \[Import\]/.test(t)){await sleep(Math.min(30000,2000*2**a));continue}
+    throw new Error(method+" "+path.slice(0,90)+" -> "+r.status+": "+t.slice(0,300));
+  }
+  throw new Error("retries exhausted: "+path.slice(0,90));
+}
+const get=p=>api("GET",p).then(r=>r.json), post=(p,b,h)=>api("POST",p,b,h), patch=(p,b)=>api("PATCH",p,b), del=p=>api("DELETE",p);
+const newId=h=>{const u=h.get("OData-EntityId")||h.get("Location");return u.split("(").pop().replace(")","")};
+const q=s=>String(s).replace(/'/g,"''"), enc=encodeURIComponent;
+async function find(es,flt,sel){const r=await get(`${es}?$select=${sel}&$filter=${enc(flt)}&$top=1`);return r.value[0]}
+async function ensure(es,flt,body,idf,hdr){const ex=await find(es,flt,idf);if(ex)return[ex[idf],false];const r=await post(es,body,hdr);return[newId(r.h),true]}
+async function pool(items,n,fn){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<items.length){const it=items[i++];await fn(it)}}))}
+
+// dates are shifted so the data is always "current"
+const BASE=Date.UTC(2026,9,27), now=new Date(), TODAY=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()), DELTA=Math.round((TODAY-BASE)/864e5);
+const p2=n=>String(n).padStart(2,"0"), ymd=ms=>{const d=new Date(ms);return`${d.getUTCFullYear()}-${p2(d.getUTCMonth()+1)}-${p2(d.getUTCDate())}`};
+const day=n=>TODAY+n*864e5, iso=(ms,h=6)=>ymd(ms)+`T${p2(h)}:00:00Z`, shiftStr=s=>ymd(Date.parse(s+"T00:00:00Z")+DELTA*864e5);
+const monthStart=(y,m)=>Date.UTC(y,m,1), addMonths=(ms,n)=>{const d=new Date(ms);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+n,1)};
+const rng=seed=>{let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+
+let ctx={}, attrs={};
+async function loadAttrs(ent){if(attrs[ent])return attrs[ent];const r=await get(`EntityDefinitions(LogicalName='${ent}')/Attributes?$select=LogicalName`);return attrs[ent]=new Set(r.value.map(x=>x.LogicalName))}
+async function filt(ent,body){const a=await loadAttrs(ent),o={};for(const k in body){if(/^(c42_|incpt_|msdyn_)/.test(k)&&!k.includes("@")&&!a.has(k)){continue}o[k]=body[k]}return o}
+
+async function precheck(){
+  const out=[];let ok=true;const add=(good,t)=>{out.push(`<div class="${good?"ok":"bad"}">${good?"✔":"✖"} ${t}</div>`);if(!good)ok=false};
+  try{
+    const w=await get("WhoAmI");ctx.me=w.UserId;
+    const org=await get("organizations?$select=_basecurrencyid_value,name");ctx.cur=org.value[0]._basecurrencyid_value;$("org").textContent=org.value[0].name||location.host;
+    add(true,"Signed in and connected to Dataverse ("+location.host+")");
+    const m=await get("EntityDefinitions?$select=LogicalName&$filter="+enc("LogicalName eq 'c42_subscription' or LogicalName eq 'c42_consumption'"));
+    add(m.value.length===2,"C42 Sales Copilot solution installed (tables c42_subscription, c42_consumption)");
+    const a=await loadAttrs("account");
+    add(true,"Account 360 columns: c42_customertier "+(a.has("c42_customertier")?"found":"<span class='w'>missing - will be skipped</span>")+", incpt_* "+(a.has("incpt_currentarr")?"found":"<span class='w'>missing - will be skipped</span>"));
+  }catch(e){add(false,"Cannot reach Dataverse from this page: "+e.message)}
+  $("checks").innerHTML=out.join("");return ok;
+}
+
+async function setupCatalog(){
+  log("Catalog: unit group, price list, products");
+  let [sid]=await ensure("uomschedules",`name eq 'Core42 Unit'`,{name:"Core42 Unit",baseuomname:"Unit"},"uomscheduleid");
+  const u=await find("uoms",`_uomscheduleid_value eq ${sid} and isschedulebaseuom eq true`,"uomid");ctx.uom=u.uomid;
+  let [pl,pn]=await ensure("pricelevels",`name eq 'Core42 Compass AI Pricing - USD'`,{name:"Core42 Compass AI Pricing - USD","transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`},"pricelevelid");
+  ctx.pl=pl;ctx.prod={};
+  for(const k in DATA.PRODUCTS){
+    const p=DATA.PRODUCTS[k];let ex=await find("products",`productnumber eq '${q(p.number)}'`,"productid,_defaultuomid_value,statecode");
+    if(!ex){
+      const r=await post("products",{name:p.name,productnumber:p.number,description:p.desc||undefined,quantitydecimal:p.qd,"defaultuomscheduleid@odata.bind":`/uomschedules(${sid})`,"defaultuomid@odata.bind":`/uoms(${ctx.uom})`,"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+      const id=newId(r.h);
+      if(p.amount)await post("productpricelevels",{"pricelevelid@odata.bind":`/pricelevels(${pl})`,"productid@odata.bind":`/products(${id})`,"uomid@odata.bind":`/uoms(${ctx.uom})`,amount:p.amount,pricingmethodcode:1,"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+      try{await patch(`products(${id})`,{statecode:0,statuscode:1})}catch(e){log("  could not activate "+p.number+": "+e.message.slice(0,120),"w")}
+      ex={productid:id,_defaultuomid_value:ctx.uom};log("  + "+p.name);
+    }
+    ctx.prod[k]={id:ex.productid,uom:ex._defaultuomid_value||ctx.uom};
+  }
+}
+
+const OWN=()=>({"ownerid@odata.bind":`/systemusers(${ctx.me})`}), CUR=()=>({"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+const HS={};
+async function seedAccount(a){
+  const k=a.key;log(`\n== ${a.name}`);
+  const body=await filt("account",{name:a.name,description:`${TAG} ${a.desc}`,industrycode:a.ind,revenue:a.rev,numberofemployees:a.emp,address1_city:a.city,address1_country:a.country,websiteurl:a.web,telephone1:a.phone,c42_customertier:a.vip?100000000:100000001,incpt_customertier:a.tier,incpt_aimaturity:a.ai,incpt_currentarr:a.arr,...OWN(),...CUR()});
+  const [aid,isNew]=await ensure("accounts",`name eq '${q(a.name)}'`,body,"accountid");
+  log((isNew?"created ":"exists  ")+a.name,isNew?"ok":"");
+  const accBind=`/accounts(${aid})`, cids=[];
+  for(const [fn0,ln,jt] of a.contacts){
+    let fn=fn0,sal="";for(const t of ["Dr.","Prof."])if(fn.startsWith(t)){sal=t;fn=fn.slice(t.length).trim()}
+    const em=fn.toLowerCase().replace(/[^a-z]/g,"")+"."+ln.toLowerCase().replace("al ","al").replace(/[^a-z]/g,"")+"@"+a.dom;
+    const cb={firstname:fn,lastname:ln,jobtitle:jt,emailaddress1:em,telephone1:a.phone,description:`${TAG} `+(jt.includes("Executive Sponsor")?"Executive sponsor for the Core42 relationship.":"Key stakeholder."),"parentcustomerid_account@odata.bind":accBind,address1_city:a.city,address1_country:a.country,...OWN()};
+    if(sal)cb.salutation=sal;
+    cids.push((await ensure("contacts",`emailaddress1 eq '${q(em)}'`,cb,"contactid"))[0]);
+  }
+  log(`  ${cids.length} contacts`);
+  let nsub=0,ncons=0;
+  for(const s of DATA.SUBS[k]){
+    const sb={c42_name:s.name,"c42_accountid@odata.bind":accBind,c42_servicefamily:DATA.FAM[s.fam],c42_servicename:s.svc,c42_status:DATA.ST[s.st],c42_startdate:shiftStr(s.start),c42_enddate:shiftStr(s.end),c42_annualcommitvalue:s.commit,c42_contractedunits:s.units,c42_unitlabel:s.unit,c42_region:s.region,c42_notes:`${TAG} ${s.note}`.trim(),...OWN(),...CUR()};
+    if(s.prod)sb["c42_productid@odata.bind"]=`/products(${ctx.prod[s.prod].id})`;
+    const [sid]=await ensure("c42_subscriptions",`c42_name eq '${q(s.name)}' and _c42_accountid_value eq ${aid}`,sb,"c42_subscriptionid");nsub++;
+    ncons+=await seedConsumption(a,s,aid,sid);
+  }
+  log(`  ${nsub} subscriptions, ${ncons} consumption months`);
+  const o=await seedOpps(a,aid,cids);const c=await seedCases(a,aid);const ac=await seedActivities(a,aid,cids,o.first);
+  log(`  ${o.n} opportunities, ${c} cases, ${ac} activities`,"ok");
+}
+
+async function seedConsumption(a,s,aid,sid){
+  const r=rng([...s.name].reduce((x,c)=>x+c.charCodeAt(0),0));
+  const cur=monthStart(now.getFullYear(),now.getMonth()), first=addMonths(cur,a.flagship?-11:-5), st0=Date.parse(shiftStr(s.start)+"T00:00:00Z"), sm=monthStart(new Date(st0).getUTCFullYear(),new Date(st0).getUTCMonth());
+  const months=[];for(let m=Math.max(first,sm);m<=cur;m=addMonths(m,1))months.push(m);
+  const monthly=s.units/12,price=s.commit/s.units,dip=addMonths(cur,-7),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const rows=months.map((m,i)=>{
+    let util=s.u0*Math.pow(1+s.g,i)*(1+(r()*2-1)*0.04),note="";
+    if(a.flagship&&m===dip&&["Compass","AI Cloud GPU","Insight"].includes(s.fam)){util*=0.72;note="Dip: seasonal slowdown and clinic freeze period."}
+    if(m===cur){util*=now.getDate()/dim;note="Month-to-date (partial)."}
+    util=Math.max(0.05,Math.min(util,1.4));const units=Math.round(monthly*util*100)/100;
+    return{c42_name:`${s.name} - ${ymd(m).slice(0,7)}`,"c42_accountid@odata.bind":`/accounts(${aid})`,"c42_subscriptionid@odata.bind":`/c42_subscriptions(${sid})`,c42_servicefamily:DATA.FAM[s.fam],c42_month:ymd(m),c42_unitsconsumed:units,c42_billedamount:Math.round(units*price*100)/100,c42_utilisationpct:Math.round(util*10000)/100,c42_notes:`${TAG} ${note}`.trim(),...OWN(),...CUR()};
+  });
+  await pool(rows,4,b=>ensure("c42_consumptions",`c42_name eq '${q(b.c42_name)}' and _c42_accountid_value eq ${aid}`,b,"c42_consumptionid"));
+  return rows.length;
+}
+
+async function seedOpps(a,aid,cids){
+  const ids={};let n=0;
+  for(const [name,val,mo,stg,prob,fc,bundle,lines,desc] of DATA.OPEN[a.key]){
+    const close=TODAY+Math.floor(mo*30.4)*864e5;
+    const body=await filt("opportunity",{name,description:`${TAG} ${desc}`,estimatedvalue:val,estimatedclosedate:ymd(close),closeprobability:prob,msdyn_forecastcategory:fc?100000001:100000000,salesstage:stg,stepname:["Qualify","Develop","Propose","Close"][stg],opportunityratingcode:prob>=65?1:prob>=40?2:3,"customerid_account@odata.bind":`/accounts(${aid})`,"parentaccountid@odata.bind":`/accounts(${aid})`,"pricelevelid@odata.bind":`/pricelevels(${ctx.pl})`,...OWN(),...CUR()});
+    const [oid,isNew]=await ensure("opportunities",`name eq '${q(name)}' and _customerid_value eq ${aid}`,body,"opportunityid");ids[name]=oid;n++;
+    if(isNew&&lines.length){
+      for(const [pk,qty,price] of lines){try{await post("opportunityproducts",{"opportunityid@odata.bind":`/opportunities(${oid})`,"productid@odata.bind":`/products(${ctx.prod[pk].id})`,"uomid@odata.bind":`/uoms(${ctx.prod[pk].uom})`,quantity:qty,ispriceoverridden:true,priceperunit:price,...CUR()})}catch(e){log("  opp product failed: "+e.message.slice(0,160),"w")}}
+      await patch(`opportunities(${oid})`,{isrevenuesystemcalculated:false,estimatedvalue:val});
+    }
+  }
+  for(const [name,val,ago] of DATA.WON[a.key]){
+    const d=day(-ago);
+    const [oid,isNew]=await ensure("opportunities",`name eq '${q(name)}' and _customerid_value eq ${aid}`,{name,description:`${TAG} Closed-won. Core42 platform deal.`,estimatedvalue:val,estimatedclosedate:ymd(d),"customerid_account@odata.bind":`/accounts(${aid})`,"parentaccountid@odata.bind":`/accounts(${aid})`,...OWN(),...CUR()},"opportunityid");n++;
+    if(isNew)try{await post("WinOpportunity",{Status:3,OpportunityClose:{subject:"Won - "+name,"opportunityid@odata.bind":`/opportunities(${oid})`,actualrevenue:val,actualend:iso(d)}})}catch(e){log("  win failed: "+e.message.slice(0,160),"w")}
+  }
+  return{n,first:Object.entries(ids)[0]};
+}
+
+const fmt=(s,f)=>s.replace(/\{(\w+)\}/g,(_,k)=>f[k]);
+async function seedCases(a,aid){
+  let n=0;
+  for(const [pk,f,resolved,ago] of DATA.CASES[a.key]){
+    const [t0,d0,prio,typ]=DATA.CASE_POOL[pk],title=fmt(t0,f),desc=fmt(d0,f);
+    const [cid,isNew]=await ensure("incidents",`title eq '${q(title)}' and _customerid_value eq ${aid}`,{title,description:`${TAG} ${desc}`,prioritycode:prio,casetypecode:typ,caseorigincode:[1,2,3][ago%3],"customerid_account@odata.bind":`/accounts(${aid})`,overriddencreatedon:iso(day(-ago),8),...OWN()},"incidentid");n++;
+    if(resolved&&isNew)try{await post("CloseIncident",{IncidentResolution:{"@odata.type":"Microsoft.Dynamics.CRM.incidentresolution",subject:("Resolved: "+title).slice(0,150),description:"Resolved by Core42 support engineering.",timespent:180,"incidentid@odata.bind":`/incidents(${cid})`},Status:5})}catch(e){log("  close case failed: "+e.message.slice(0,160),"w")}
+  }
+  return n;
+}
+
+const party=(es,id,mask)=>({[`partyid_${es}@odata.bind`]:`/${es==="contact"?"contacts":"systemusers"}(${id})`,participationtypemask:mask});
+async function seedActivities(a,aid,cids,o1e){
+  const [o1n,o1]=o1e,short=a.name,me=ctx.me,c0=cids[0],c1=cids[cids.length>1?1:0],cproc=cids.length>3?cids[cids.length-1]:cids[0];
+  const RA=["account",aid],RO=["opportunity",o1];
+  const acts=[["email",`Follow-up: ${o1n}`,"Sharing the updated proposal and pricing for your review.",-3,RO,c1,true,{dir:true}],
+   ["email",`RE: Commercial terms and Compass quota - ${short}`,"Thanks - we can proceed once procurement signs off on the revised quota.",-9,RA,cproc,true,{dir:false}],
+   ["phonecall","Check-in call: usage, quota and roadmap","Reviewed consumption trends and upcoming capacity needs.",-12,RA,c0,true,{dir:true}],
+   ["phonecall","Inbound call from CTO office about GPU capacity","Customer asked for earliest availability of additional GPU nodes.",-5,RA,c1,true,{dir:false}],
+   ["appointment",`Executive briefing: Core42 AI roadmap - ${short}`,"Executive briefing on Compass, AI Cloud and sovereign roadmap.",-6,RA,c0,true,{}],
+   ["appointment",`Solution architecture workshop - ${o1n}`,"Workshop on target architecture, data residency controls and sizing.",5,RO,c1,false,{}],
+   ["appointment","Quarterly business review & renewal planning","QBR covering consumption vs commit, roadmap and renewals.",12,RA,c0,false,{}],
+   ["task","Send revised proposal","Update pricing with latest Compass token rates and bundle options.",3,RO,null,false,{}],
+   ["task","Share Compass pricing sheet","Sent model-by-model token pricing.",-8,RA,null,true,{}],
+   ["task","Schedule security review with CISO","Arrange sovereign controls & data-residency review.",9,RA,null,false,{}]];
+  if(a.flagship)acts.push(["email","Escalation: Arabic GPT-4.1 usage decline and migration plan","Usage on GPT-4.1 Arabic has fallen ~60% since Q2; proposing a retention plan including fine-tuned Arabic option.",-1,RA,cids[1],true,{dir:true}],
+   ["appointment","Executive sponsor sync - CTO","Sponsor sync on renewal, churn-risk subscription and expansion.",2,RA,cids[1],false,{}],
+   ["phonecall","Renewal discussion - Sovereign Cloud (Azure Local)","Prepare renewal and 12-node expansion proposal.",1,RA,cids[4],false,{dir:true}],
+   ["task","Prepare renewal quote for Azure Local","Renewal due in ~75 days.",6,RA,null,false,{}]);
+  const ES={email:"emails",phonecall:"phonecalls",appointment:"appointments",task:"tasks"};
+  let n=0;
+  for(const [kind,subj,desc,off,[rent,rid],cid,done,ex] of acts){
+    const d=day(off),past=off<0,reg=rent==="opportunity"?"opportunities":rent+"s";
+    const body={subject:subj,description:`${TAG} ${desc}`,[`regardingobjectid_${rent}_${kind}@odata.bind`]:`/${reg}(${rid})`,...OWN()};
+    if(kind==="email")Object.assign(body,{directioncode:ex.dir,email_activity_parties:[party("systemuser",me,ex.dir?1:2),party("contact",cid,ex.dir?2:1)]});
+    else if(kind==="phonecall")Object.assign(body,{directioncode:ex.dir,phonenumber:a.phone,scheduledstart:iso(d,7),scheduledend:iso(d,7),phonecall_activity_parties:[party("systemuser",me,ex.dir?1:2),party("contact",cid,ex.dir?2:1)]});
+    else if(kind==="appointment")Object.assign(body,{scheduledstart:iso(d,6),scheduledend:iso(d,7),location:"Core42 Abu Dhabi / Microsoft Teams",appointment_activity_parties:[party("systemuser",me,7),party("contact",cid,5)]});
+    else Object.assign(body,{scheduledstart:iso(d,5),scheduledend:iso(d,14),prioritycode:past?2:1});
+    try{
+      const [eid,isNew]=await ensure(ES[kind],`subject eq '${q(subj)}' and _regardingobjectid_value eq ${rid}`,body,"activityid");n++;
+      if(isNew&&done){const sc={email:ex.dir?3:4,phonecall:ex.dir?2:4,appointment:3,task:5}[kind];try{await patch(`${ES[kind]}(${eid})`,{statecode:1,statuscode:sc})}catch(e){log("  complete failed "+kind+": "+e.message.slice(0,120),"w")}}
+    }catch(e){log("  activity failed ("+kind+"): "+e.message.slice(0,160),"w")}
+  }
+  return n;
+}
+
+async function removeAll(){
+  log("Removing demo data created by this page...");
+  const ids=async(es,pk,flt)=>{let out=[],u=`${es}?$select=${pk}&$filter=${enc(flt)}`;while(u){const r=await get(u);out.push(...r.value.map(x=>x[pk]));u=r["@odata.nextLink"]||null}return out};
+  let i=0;
+  for(const a of DATA.ACCOUNTS){
+    const r=await find("accounts",`name eq '${q(a.name)}'`,"accountid,description");
+    if(!r||!(r.description||"").startsWith(TAG)){continue}
+    const aid=r.accountid;log("  removing "+a.name);
+    const opps=await ids("opportunities","opportunityid",`_customerid_value eq ${aid}`),cases=await ids("incidents","incidentid",`_customerid_value eq ${aid}`);
+    for(const reg of [aid,...opps,...cases])for(const es of ["emails","phonecalls","appointments","tasks"])for(const id of await ids(es,"activityid",`_regardingobjectid_value eq ${reg}`))await del(`${es}(${id})`);
+    await pool(await ids("c42_consumptions","c42_consumptionid",`_c42_accountid_value eq ${aid}`),4,id=>del(`c42_consumptions(${id})`));
+    for(const id of await ids("c42_subscriptions","c42_subscriptionid",`_c42_accountid_value eq ${aid}`))await del(`c42_subscriptions(${id})`);
+    for(const id of cases)await del(`incidents(${id})`);
+    for(const id of opps)await del(`opportunities(${id})`);
+    for(const id of await ids("contacts","contactid",`_parentcustomerid_value eq ${aid}`))await del(`contacts(${id})`);
+    await del(`accounts(${aid})`);$("pb").style.width=(++i/DATA.ACCOUNTS.length*100)+"%";
+  }
+  log("Done. (The Core42 product catalog and price list were left in place.)","ok");
+}
+
+const sel=()=>DATA.ACCOUNTS.filter(a=>$("a_"+a.key).checked);
+async function run(fn){
+  $("go").disabled=$("rm").disabled=true;$("pb").style.width="0";
+  try{await fn()}catch(e){log("FAILED: "+e.message,"bad");$("state").textContent="Failed - see log"}
+  $("go").disabled=$("rm").disabled=false;
+}
+$("go").onclick=()=>run(async()=>{
+  const list=sel();if(!list.length)return log("Select at least one account","w");
+  $("state").textContent="Seeding...";log(`Seeding ${list.length} account(s); dates shifted ${DELTA} days to today.`);
+  await setupCatalog();let i=0;
+  for(const a of list){try{await seedAccount(a)}catch(e){log("FAILED "+a.name+": "+e.message,"bad")}$("pb").style.width=(++i/list.length*100)+"%"}
+  log("\nAll done. Open the C42 Sales Copilot app and ask: \"Show me the Account 360 for "+list[0].name+"\".","ok");$("state").textContent="Done";
+});
+$("rm").onclick=()=>{if(confirm("Delete all demo records created by this page?"))run(async()=>{$("state").textContent="Removing...";await removeAll();$("state").textContent="Done"})};
+$("accts").innerHTML=DATA.ACCOUNTS.map(a=>`<label class="chk"><input type="checkbox" id="a_${a.key}" checked> <b>${a.name}</b> <span class="pill">${a.city}</span><span class="pill">${DATA.SUBS[a.key].length} subscriptions</span>${a.flagship?'<span class="pill">flagship</span>':""}</label>`).join("");
+precheck().then(ok=>{$("go").disabled=!ok;$("rm").disabled=!ok});
+</script></body></html>

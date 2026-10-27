@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>C42 Sales Copilot - Demo data</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0b1020;--card:#141b34;--line:#26305a;--fg:#e8ecff;--mut:#9aa6d6;--acc:#5b8cff;--ok:#3ddc97;--bad:#ff6b6b;--warn:#ffc857}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.warn{border-color:#6b5520;background:#241f10;color:#ffe3a1}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer}
+button.sec{background:transparent;border:1px solid var(--line);color:var(--fg)}button.dng{background:#a83a3a}button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.chk{display:flex;gap:8px;align-items:center;padding:3px 0}
+.bar{height:8px;border-radius:6px;background:#0d1330;overflow:hidden;margin:10px 0}.bar>i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+#log{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;background:#070b18;border:1px solid var(--line);border-radius:8px;padding:10px;height:280px;overflow:auto;white-space:pre-wrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.w{color:var(--warn)}.pill{display:inline-block;padding:1px 8px;border-radius:99px;border:1px solid var(--line);font-size:12px;color:var(--mut);margin-right:6px}
+</style></head><body><div class="wrap">
+<h1>C42 Sales Copilot - demo data</h1>
+<div class="sub">Seeds fictional Core42 customer accounts into <b id="org">this environment</b>: accounts, contacts, subscriptions, monthly consumption, pipeline, cases and activities.</div>
+<div class="card warn"><b>Demo-grade.</b> Creates sample records in the environment you opened this page from, using <i>your</i> sign-in. All names are fictional. Run it only in a demo/dev environment. Safe to run again (it skips what already exists). "Remove demo data" deletes only the records this page created (tagged <code>[C42SEED]</code>).</div>
+<div class="card"><b>Pre-checks</b><div id="checks" style="margin-top:6px">Checking...</div></div>
+<div class="card"><b>Accounts to seed</b><div id="accts" style="margin-top:6px"></div>
+<div class="row" style="margin-top:12px"><button id="go" disabled>Seed demo data</button><button id="rm" class="sec dng" disabled>Remove demo data</button><span id="state" class="sub" style="margin:0"></span></div>
+<div class="bar"><i id="pb"></i></div></div>
+<div class="card"><div id="log"></div></div>
+</div>
+<script>
+const DATA=/*__DATA__*/null;
+const ORG=location.origin, API=ORG+"/api/data/v9.2/";
+const TAG=DATA.TAG, $=id=>document.getElementById(id);
+const log=(m,c)=>{const e=$("log"),s=document.createElement("span");if(c)s.className=c;s.textContent=m+"\n";e.appendChild(s);e.scrollTop=e.scrollHeight};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function api(method,path,body,headers){
+  const url=path.startsWith("http")?path:API+path;
+  for(let a=0;a<6;a++){
+    const r=await fetch(url,{method,credentials:"same-origin",headers:Object.assign({"Accept":"application/json","OData-MaxVersion":"4.0","OData-Version":"4.0","Content-Type":"application/json; charset=utf-8"},headers||{}),body:body===undefined?undefined:JSON.stringify(body)});
+    if(r.ok){const t=await r.text();return{json:t?JSON.parse(t):null,h:r.headers}}
+    const t=await r.text();
+    if([429,503,504].includes(r.status)||/1205|another \[Import\]/.test(t)){await sleep(Math.min(30000,2000*2**a));continue}
+    throw new Error(method+" "+path.slice(0,90)+" -> "+r.status+": "+t.slice(0,300));
+  }
+  throw new Error("retries exhausted: "+path.slice(0,90));
+}
+const get=p=>api("GET",p).then(r=>r.json), post=(p,b,h)=>api("POST",p,b,h), patch=(p,b)=>api("PATCH",p,b), del=p=>api("DELETE",p);
+const newId=h=>{const u=h.get("OData-EntityId")||h.get("Location");return u.split("(").pop().replace(")","")};
+const q=s=>String(s).replace(/'/g,"''"), enc=encodeURIComponent;
+async function find(es,flt,sel){const r=await get(`${es}?$select=${sel}&$filter=${enc(flt)}&$top=1`);return r.value[0]}
+async function ensure(es,flt,body,idf,hdr){const ex=await find(es,flt,idf);if(ex)return[ex[idf],false];const r=await post(es,body,hdr);return[newId(r.h),true]}
+async function pool(items,n,fn){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<items.length){const it=items[i++];await fn(it)}}))}
+
+// dates are shifted so the data is always "current"
+const BASE=Date.UTC(2026,9,27), now=new Date(), TODAY=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()), DELTA=Math.round((TODAY-BASE)/864e5);
+const p2=n=>String(n).padStart(2,"0"), ymd=ms=>{const d=new Date(ms);return`${d.getUTCFullYear()}-${p2(d.getUTCMonth()+1)}-${p2(d.getUTCDate())}`};
+const day=n=>TODAY+n*864e5, iso=(ms,h=6)=>ymd(ms)+`T${p2(h)}:00:00Z`, shiftStr=s=>ymd(Date.parse(s+"T00:00:00Z")+DELTA*864e5);
+const monthStart=(y,m)=>Date.UTC(y,m,1), addMonths=(ms,n)=>{const d=new Date(ms);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+n,1)};
+const rng=seed=>{let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+
+let ctx={}, attrs={};
+async function loadAttrs(ent){if(attrs[ent])return attrs[ent];const r=await get(`EntityDefinitions(LogicalName='${ent}')/Attributes?$select=LogicalName`);return attrs[ent]=new Set(r.value.map(x=>x.LogicalName))}
+async function filt(ent,body){const a=await loadAttrs(ent),o={};for(const k in body){if(/^(c42_|incpt_|msdyn_)/.test(k)&&!k.includes("@")&&!a.has(k)){continue}o[k]=body[k]}return o}
+
+async function precheck(){
+  const out=[];let ok=true;const add=(good,t)=>{out.push(`<div class="${good?"ok":"bad"}">${good?"✔":"✖"} ${t}</div>`);if(!good)ok=false};
+  try{
+    const w=await get("WhoAmI");ctx.me=w.UserId;
+    const org=await get("organizations?$select=_basecurrencyid_value,name");ctx.cur=org.value[0]._basecurrencyid_value;$("org").textContent=org.value[0].name||location.host;
+    add(true,"Signed in and connected to Dataverse ("+location.host+")");
+    const m=await get("EntityDefinitions?$select=LogicalName&$filter="+enc("LogicalName eq 'c42_subscription' or LogicalName eq 'c42_consumption'"));
+    add(m.value.length===2,"C42 Sales Copilot solution installed (tables c42_subscription, c42_consumption)");
+    const a=await loadAttrs("account");
+    add(true,"Account 360 columns: c42_customertier "+(a.has("c42_customertier")?"found":"<span class='w'>missing - will be skipped</span>")+", incpt_* "+(a.has("incpt_currentarr")?"found":"<span class='w'>missing - will be skipped</span>"));
+  }catch(e){add(false,"Cannot reach Dataverse from this page: "+e.message)}
+  $("checks").innerHTML=out.join("");return ok;
+}
+
+async function setupCatalog(){
+  log("Catalog: unit group, price list, products");
+  let [sid]=await ensure("uomschedules",`name eq 'Core42 Unit'`,{name:"Core42 Unit",baseuomname:"Unit"},"uomscheduleid");
+  const u=await find("uoms",`_uomscheduleid_value eq ${sid} and isschedulebaseuom eq true`,"uomid");ctx.uom=u.uomid;
+  let [pl,pn]=await ensure("pricelevels",`name eq 'Core42 Compass AI Pricing - USD'`,{name:"Core42 Compass AI Pricing - USD","transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`},"pricelevelid");
+  ctx.pl=pl;ctx.prod={};
+  for(const k in DATA.PRODUCTS){
+    const p=DATA.PRODUCTS[k];let ex=await find("products",`productnumber eq '${q(p.number)}'`,"productid,_defaultuomid_value,statecode");
+    if(!ex){
+      const r=await post("products",{name:p.name,productnumber:p.number,description:p.desc||undefined,quantitydecimal:p.qd,"defaultuomscheduleid@odata.bind":`/uomschedules(${sid})`,"defaultuomid@odata.bind":`/uoms(${ctx.uom})`,"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+      const id=newId(r.h);
+      if(p.amount)await post("productpricelevels",{"pricelevelid@odata.bind":`/pricelevels(${pl})`,"productid@odata.bind":`/products(${id})`,"uomid@odata.bind":`/uoms(${ctx.uom})`,amount:p.amount,pricingmethodcode:1,"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+      try{await patch(`products(${id})`,{statecode:0,statuscode:1})}catch(e){log("  could not activate "+p.number+": "+e.message.slice(0,120),"w")}
+      ex={productid:id,_defaultuomid_value:ctx.uom};log("  + "+p.name);
+    }
+    ctx.prod[k]={id:ex.productid,uom:ex._defaultuomid_value||ctx.uom};
+  }
+}
+
+const OWN=()=>({"ownerid@odata.bind":`/systemusers(${ctx.me})`}), CUR=()=>({"transactioncurrencyid@odata.bind":`/transactioncurrencies(${ctx.cur})`});
+const HS={};
+async function seedAccount(a){
+  const k=a.key;log(`\n== ${a.name}`);
+  const body=await filt("account",{name:a.name,description:`${TAG} ${a.desc}`,industrycode:a.ind,revenue:a.rev,numberofemployees:a.emp,address1_city:a.city,address1_country:a.country,websiteurl:a.web,telephone1:a.phone,c42_customertier:a.vip?100000000:100000001,incpt_customertier:a.tier,incpt_aimaturity:a.ai,incpt_currentarr:a.arr,...OWN(),...CUR()});
+  const [aid,isNew]=await ensure("accounts",`name eq '${q(a.name)}'`,body,"accountid");
+  log((isNew?"created ":"exists  ")+a.name,isNew?"ok":"");
+  const accBind=`/accounts(${aid})`, cids=[];
+  for(const [fn0,ln,jt] of a.contacts){
+    let fn=fn0,sal="";for(const t of ["Dr.","Prof."])if(fn.startsWith(t)){sal=t;fn=fn.slice(t.length).trim()}
+    const em=fn.toLowerCase().replace(/[^a-z]/g,"")+"."+ln.toLowerCase().replace("al ","al").replace(/[^a-z]/g,"")+"@"+a.dom;
+    const cb={firstname:fn,lastname:ln,jobtitle:jt,emailaddress1:em,telephone1:a.phone,description:`${TAG} `+(jt.includes("Executive Sponsor")?"Executive sponsor for the Core42 relationship.":"Key stakeholder."),"parentcustomerid_account@odata.bind":accBind,address1_city:a.city,address1_country:a.country,...OWN()};
+    if(sal)cb.salutation=sal;
+    cids.push((await ensure("contacts",`emailaddress1 eq '${q(em)}'`,cb,"contactid"))[0]);
+  }
+  log(`  ${cids.length} contacts`);
+  let nsub=0,ncons=0;
+  for(const s of DATA.SUBS[k]){
+    const sb={c42_name:s.name,"c42_accountid@odata.bind":accBind,c42_servicefamily:DATA.FAM[s.fam],c42_servicename:s.svc,c42_status:DATA.ST[s.st],c42_startdate:shiftStr(s.start),c42_enddate:shiftStr(s.end),c42_annualcommitvalue:s.commit,c42_contractedunits:s.units,c42_unitlabel:s.unit,c42_region:s.region,c42_notes:`${TAG} ${s.note}`.trim(),...OWN(),...CUR()};
+    if(s.prod)sb["c42_productid@odata.bind"]=`/products(${ctx.prod[s.prod].id})`;
+    const [sid]=await ensure("c42_subscriptions",`c42_name eq '${q(s.name)}' and _c42_accountid_value eq ${aid}`,sb,"c42_subscriptionid");nsub++;
+    ncons+=await seedConsumption(a,s,aid,sid);
+  }
+  log(`  ${nsub} subscriptions, ${ncons} consumption months`);
+  const o=await seedOpps(a,aid,cids);const c=await seedCases(a,aid);const ac=await seedActivities(a,aid,cids,o.first);
+  log(`  ${o.n} opportunities, ${c} cases, ${ac} activities`,"ok");
+}
+
+async function seedConsumption(a,s,aid,sid){
+  const r=rng([...s.name].reduce((x,c)=>x+c.charCodeAt(0),0));
+  const cur=monthStart(now.getFullYear(),now.getMonth()), first=addMonths(cur,a.flagship?-11:-5), st0=Date.parse(shiftStr(s.start)+"T00:00:00Z"), sm=monthStart(new Date(st0).getUTCFullYear(),new Date(st0).getUTCMonth());
+  const months=[];for(let m=Math.max(first,sm);m<=cur;m=addMonths(m,1))months.push(m);
+  const monthly=s.units/12,price=s.commit/s.units,dip=addMonths(cur,-7),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const rows=months.map((m,i)=>{
+    let util=s.u0*Math.pow(1+s.g,i)*(1+(r()*2-1)*0.04),note="";
+    if(a.flagship&&m===dip&&["Compass","AI Cloud GPU","Insight"].includes(s.fam)){util*=0.72;note="Dip: seasonal slowdown and clinic freeze period."}
+    if(m===cur){util*=now.getDate()/dim;note="Month-to-date (partial)."}
+    util=Math.max(0.05,Math.min(util,1.4));const units=Math.round(monthly*util*100)/100;
+    return{c42_name:`${s.name} - ${ymd(m).slice(0,7)}`,"c42_accountid@odata.bind":`/accounts(${aid})`,"c42_subscriptionid@odata.bind":`/c42_subscriptions(${sid})`,c42_servicefamily:DATA.FAM[s.fam],c42_month:ymd(m),c42_unitsconsumed:units,c42_billedamount:Math.round(units*price*100)/100,c42_utilisationpct:Math.round(util*10000)/100,c42_notes:`${TAG} ${note}`.trim(),...OWN(),...CUR()};
+  });
+  await pool(rows,4,b=>ensure("c42_consumptions",`c42_name eq '${q(b.c42_name)}' and _c42_accountid_value eq ${aid}`,b,"c42_consumptionid"));
+  return rows.length;
+}
+
+async function seedOpps(a,aid,cids){
+  const ids={};let n=0;
+  for(const [name,val,mo,stg,prob,fc,bundle,lines,desc] of DATA.OPEN[a.key]){
+    const close=TODAY+Math.floor(mo*30.4)*864e5;
+    const body=await filt("opportunity",{name,description:`${TAG} ${desc}`,estimatedvalue:val,estimatedclosedate:ymd(close),closeprobability:prob,msdyn_forecastcategory:fc?100000001:100000000,salesstage:stg,stepname:["Qualify","Develop","Propose","Close"][stg],opportunityratingcode:prob>=65?1:prob>=40?2:3,"customerid_account@odata.bind":`/accounts(${aid})`,"parentaccountid@odata.bind":`/accounts(${aid})`,"pricelevelid@odata.bind":`/pricelevels(${ctx.pl})`,...OWN(),...CUR()});
+    const [oid,isNew]=await ensure("opportunities",`name eq '${q(name)}' and _customerid_value eq ${aid}`,body,"opportunityid");ids[name]=oid;n++;
+    if(isNew&&lines.length){
+      for(const [pk,qty,price] of lines){try{await post("opportunityproducts",{"opportunityid@odata.bind":`/opportunities(${oid})`,"productid@odata.bind":`/products(${ctx.prod[pk].id})`,"uomid@odata.bind":`/uoms(${ctx.prod[pk].uom})`,quantity:qty,ispriceoverridden:true,priceperunit:price,...CUR()})}catch(e){log("  opp product failed: "+e.message.slice(0,160),"w")}}
+      await patch(`opportunities(${oid})`,{isrevenuesystemcalculated:false,estimatedvalue:val});
+    }
+  }
+  for(const [name,val,ago] of DATA.WON[a.key]){
+    const d=day(-ago);
+    const [oid,isNew]=await ensure("opportunities",`name eq '${q(name)}' and _customerid_value eq ${aid}`,{name,description:`${TAG} Closed-won. Core42 platform deal.`,estimatedvalue:val,estimatedclosedate:ymd(d),"customerid_account@odata.bind":`/accounts(${aid})`,"parentaccountid@odata.bind":`/accounts(${aid})`,...OWN(),...CUR()},"opportunityid");n++;
+    if(isNew)try{await post("WinOpportunity",{Status:3,OpportunityClose:{subject:"Won - "+name,"opportunityid@odata.bind":`/opportunities(${oid})`,actualrevenue:val,actualend:iso(d)}})}catch(e){log("  win failed: "+e.message.slice(0,160),"w")}
+  }
+  return{n,first:Object.entries(ids)[0]};
+}
+
+const fmt=(s,f)=>s.replace(/\{(\w+)\}/g,(_,k)=>f[k]);
+async function seedCases(a,aid){
+  let n=0;
+  for(const [pk,f,resolved,ago] of DATA.CASES[a.key]){
+    const [t0,d0,prio,typ]=DATA.CASE_POOL[pk],title=fmt(t0,f),desc=fmt(d0,f);
+    const [cid,isNew]=await ensure("incidents",`title eq '${q(title)}' and _customerid_value eq ${aid}`,{title,description:`${TAG} ${desc}`,prioritycode:prio,casetypecode:typ,caseorigincode:[1,2,3][ago%3],"customerid_account@odata.bind":`/accounts(${aid})`,overriddencreatedon:iso(day(-ago),8),...OWN()},"incidentid");n++;
+    if(resolved&&isNew)try{await post("CloseIncident",{IncidentResolution:{"@odata.type":"Microsoft.Dynamics.CRM.incidentresolution",subject:("Resolved: "+title).slice(0,150),description:"Resolved by Core42 support engineering.",timespent:180,"incidentid@odata.bind":`/incidents(${cid})`},Status:5})}catch(e){log("  close case failed: "+e.message.slice(0,160),"w")}
+  }
+  return n;
+}
+
+const party=(es,id,mask)=>({[`partyid_${es}@odata.bind`]:`/${es==="contact"?"contacts":"systemusers"}(${id})`,participationtypemask:mask});
+async function seedActivities(a,aid,cids,o1e){
+  const [o1n,o1]=o1e,short=a.name,me=ctx.me,c0=cids[0],c1=cids[cids.length>1?1:0],cproc=cids.length>3?cids[cids.length-1]:cids[0];
+  const RA=["account",aid],RO=["opportunity",o1];
+  const acts=[["email",`Follow-up: ${o1n}`,"Sharing the updated proposal and pricing for your review.",-3,RO,c1,true,{dir:true}],
+   ["email",`RE: Commercial terms and Compass quota - ${short}`,"Thanks - we can proceed once procurement signs off on the revised quota.",-9,RA,cproc,true,{dir:false}],
+   ["phonecall","Check-in call: usage, quota and roadmap","Reviewed consumption trends and upcoming capacity needs.",-12,RA,c0,true,{dir:true}],
+   ["phonecall","Inbound call from CTO office about GPU capacity","Customer asked for earliest availability of additional GPU nodes.",-5,RA,c1,true,{dir:false}],
+   ["appointment",`Executive briefing: Core42 AI roadmap - ${short}`,"Executive briefing on Compass, AI Cloud and sovereign roadmap.",-6,RA,c0,true,{}],
+   ["appointment",`Solution architecture workshop - ${o1n}`,"Workshop on target architecture, data residency controls and sizing.",5,RO,c1,false,{}],
+   ["appointment","Quarterly business review & renewal planning","QBR covering consumption vs commit, roadmap and renewals.",12,RA,c0,false,{}],
+   ["task","Send revised proposal","Update pricing with latest Compass token rates and bundle options.",3,RO,null,false,{}],
+   ["task","Share Compass pricing sheet","Sent model-by-model token pricing.",-8,RA,null,true,{}],
+   ["task","Schedule security review with CISO","Arrange sovereign controls & data-residency review.",9,RA,null,false,{}]];
+  if(a.flagship)acts.push(["email","Escalation: Arabic GPT-4.1 usage decline and migration plan","Usage on GPT-4.1 Arabic has fallen ~60% since Q2; proposing a retention plan including fine-tuned Arabic option.",-1,RA,cids[1],true,{dir:true}],
+   ["appointment","Executive sponsor sync - CTO","Sponsor sync on renewal, churn-risk subscription and expansion.",2,RA,cids[1],false,{}],
+   ["phonecall","Renewal discussion - Sovereign Cloud (Azure Local)","Prepare renewal and 12-node expansion proposal.",1,RA,cids[4],false,{dir:true}],
+   ["task","Prepare renewal quote for Azure Local","Renewal due in ~75 days.",6,RA,null,false,{}]);
+  const ES={email:"emails",phonecall:"phonecalls",appointment:"appointments",task:"tasks"};
+  let n=0;
+  for(const [kind,subj,desc,off,[rent,rid],cid,done,ex] of acts){
+    const d=day(off),past=off<0,reg=rent==="opportunity"?"opportunities":rent+"s";
+    const body={subject:subj,description:`${TAG} ${desc}`,[`regardingobjectid_${rent}_${kind}@odata.bind`]:`/${reg}(${rid})`,...OWN()};
+    if(kind==="email")Object.assign(body,{directioncode:ex.dir,email_activity_parties:[party("systemuser",me,ex.dir?1:2),party("contact",cid,ex.dir?2:1)]});
+    else if(kind==="phonecall")Object.assign(body,{directioncode:ex.dir,phonenumber:a.phone,scheduledstart:iso(d,7),scheduledend:iso(d,7),phonecall_activity_parties:[party("systemuser",me,ex.dir?1:2),party("contact",cid,ex.dir?2:1)]});
+    else if(kind==="appointment")Object.assign(body,{scheduledstart:iso(d,6),scheduledend:iso(d,7),location:"Core42 Abu Dhabi / Microsoft Teams",appointment_activity_parties:[party("systemuser",me,7),party("contact",cid,5)]});
+    else Object.assign(body,{scheduledstart:iso(d,5),scheduledend:iso(d,14),prioritycode:past?2:1});
+    try{
+      const [eid,isNew]=await ensure(ES[kind],`subject eq '${q(subj)}' and _regardingobjectid_value eq ${rid}`,body,"activityid");n++;
+      if(isNew&&done){const sc={email:ex.dir?3:4,phonecall:ex.dir?2:4,appointment:3,task:5}[kind];try{await patch(`${ES[kind]}(${eid})`,{statecode:1,statuscode:sc})}catch(e){log("  complete failed "+kind+": "+e.message.slice(0,120),"w")}}
+    }catch(e){log("  activity failed ("+kind+"): "+e.message.slice(0,160),"w")}
+  }
+  return n;
+}
+
+async function removeAll(){
+  log("Removing demo data created by this page...");
+  const ids=async(es,pk,flt)=>{let out=[],u=`${es}?$select=${pk}&$filter=${enc(flt)}`;while(u){const r=await get(u);out.push(...r.value.map(x=>x[pk]));u=r["@odata.nextLink"]||null}return out};
+  let i=0;
+  for(const a of DATA.ACCOUNTS){
+    const r=await find("accounts",`name eq '${q(a.name)}'`,"accountid,description");
+    if(!r||!(r.description||"").startsWith(TAG)){continue}
+    const aid=r.accountid;log("  removing "+a.name);
+    const opps=await ids("opportunities","opportunityid",`_customerid_value eq ${aid}`),cases=await ids("incidents","incidentid",`_customerid_value eq ${aid}`);
+    for(const reg of [aid,...opps,...cases])for(const es of ["emails","phonecalls","appointments","tasks"])for(const id of await ids(es,"activityid",`_regardingobjectid_value eq ${reg}`))await del(`${es}(${id})`);
+    await pool(await ids("c42_consumptions","c42_consumptionid",`_c42_accountid_value eq ${aid}`),4,id=>del(`c42_consumptions(${id})`));
+    for(const id of await ids("c42_subscriptions","c42_subscriptionid",`_c42_accountid_value eq ${aid}`))await del(`c42_subscriptions(${id})`);
+    for(const id of cases)await del(`incidents(${id})`);
+    for(const id of opps)await del(`opportunities(${id})`);
+    for(const id of await ids("contacts","contactid",`_parentcustomerid_value eq ${aid}`))await del(`contacts(${id})`);
+    await del(`accounts(${aid})`);$("pb").style.width=(++i/DATA.ACCOUNTS.length*100)+"%";
+  }
+  log("Done. (The Core42 product catalog and price list were left in place.)","ok");
+}
+
+const sel=()=>DATA.ACCOUNTS.filter(a=>$("a_"+a.key).checked);
+async function run(fn){
+  $("go").disabled=$("rm").disabled=true;$("pb").style.width="0";
+  try{await fn()}catch(e){log("FAILED: "+e.message,"bad");$("state").textContent="Failed - see log"}
+  $("go").disabled=$("rm").disabled=false;
+}
+$("go").onclick=()=>run(async()=>{
+  const list=sel();if(!list.length)return log("Select at least one account","w");
+  $("state").textContent="Seeding...";log(`Seeding ${list.length} account(s); dates shifted ${DELTA} days to today.`);
+  await setupCatalog();let i=0;
+  for(const a of list){try{await seedAccount(a)}catch(e){log("FAILED "+a.name+": "+e.message,"bad")}$("pb").style.width=(++i/list.length*100)+"%"}
+  log("\nAll done. Open the C42 Sales Copilot app and ask: \"Show me the Account 360 for "+list[0].name+"\".","ok");$("state").textContent="Done";
+});
+$("rm").onclick=()=>{if(confirm("Delete all demo records created by this page?"))run(async()=>{$("state").textContent="Removing...";await removeAll();$("state").textContent="Done"})};
+$("accts").innerHTML=DATA.ACCOUNTS.map(a=>`<label class="chk"><input type="checkbox" id="a_${a.key}" checked> <b>${a.name}</b> <span class="pill">${a.city}</span><span class="pill">${DATA.SUBS[a.key].length} subscriptions</span>${a.flagship?'<span class="pill">flagship</span>':""}</label>`).join("");
+precheck().then(ok=>{$("go").disabled=!ok;$("rm").disabled=!ok});
+</script></body></html>

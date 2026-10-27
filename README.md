@@ -31,6 +31,8 @@ No keys, endpoints, tenant IDs or client IDs are in this repo. The solution ship
 | `solution/C42SalesCopilot_unmanaged.zip` | Unmanaged solution (for customising) |
 | `app/` | Code app source |
 | `connector/` | Custom connector definitions and scripts (secrets removed) |
+| `solution/C42SalesCopilotDemoData_*.zip` | Optional solution with the **demo-data seeder** web resource |
+| `webresource/` | Seeder source (`template.html` + `build.py`) |
 | `seed/seed_data.py` | Fictional demo-data definitions |
 
 ## Prerequisites
@@ -53,8 +55,10 @@ No keys, endpoints, tenant IDs or client IDs are in this repo. The solution ship
 | `c42_RealtimeVoice` | `marin` |
 | `c42_DebugLogging` | `false` |
 
-4. Share the app with users (and grant Dataverse security roles + Foundry access).
-5. Open the app in Power Apps (desktop or mobile). It reads the variables and connects automatically.
+4. *(Optional)* Import `C42SalesCopilotDemoData_managed.zip`, then open
+   `https://<your-org>.crm.dynamics.com/WebResources/c42_/seed/seeddata.html` (in a browser signed in as an admin) and click **Seed demo data**. It creates 8 fictional Core42 customers with contacts, subscriptions, 6-12 months of consumption, pipeline, closed-won deals, cases and activities, plus a small Core42 product catalog. Dates are relative to today, it is safe to re-run, and **Remove demo data** deletes only what it created. It uses your own sign-in; nothing is hard-coded.
+5. Share the app with users (and grant Dataverse security roles + Foundry access).
+6. Open the app in Power Apps (desktop or mobile). It reads the variables and connects automatically.
 
 ## Build from source
 
